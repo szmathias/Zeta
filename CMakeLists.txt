@@ -1,5 +1,8 @@
-cmake_minimum_required(VERSION 3.16 FATAL_ERROR)
-project(Zeta VERSION 0.1.0 LANGUAGES C)
+cmake_minimum_required(VERSION 3.28 FATAL_ERROR)
+project(Zeta
+        VERSION 0.1.0
+        LANGUAGES C
+)
 
 set(CMAKE_C_STANDARD 11)
 set(CMAKE_C_STANDARD_REQUIRED ON)
@@ -24,6 +27,5 @@ if(WIN32)
             COMMENT "Copying SDL3.dll to tests directory for Windows")
 endif ()
 
-
-target_include_directories(${PROJECT_NAME} PUBLIC ${clay_SOURCE_DIR} ${Anvil_SOURCE_DIR}/include)
+target_include_directories(${PROJECT_NAME} PUBLIC ${clay_SOURCE_DIR} ${Anvil_SOURCE_DIR}/include ${SDL3_SOURCE_DIR}/include)
 target_link_libraries(${PROJECT_NAME} PUBLIC Anvil SDL3::SDL3-shared)

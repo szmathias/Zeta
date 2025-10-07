@@ -9,7 +9,6 @@
 #define WINDOW_WIDTH 640
 #define WINDOW_HEIGHT 480
 
-
 int main(void) {
     if (!SDL_Init(SDL_INIT_VIDEO)) {
         fprintf(stderr, "ERROR: SDL_Init failed: %s\n", SDL_GetError());
