@@ -1,61 +1,64 @@
-#include <stdio.h>
-#include <stdlib.h>
-#include <SDL3/SDL.h>
+#define CLAY_IMPLEMENTATION
+#include "clay.h"
+#include "clay_raylib_renderer.h"
 
-#include "anvil/common.h"
-#include "anvil/containers/arraylist.h"
+#include "stdio.h"
+#include "stdlib.h"
 
-#define WINDOW_TITLE "Test"
-#define WINDOW_WIDTH 640
-#define WINDOW_HEIGHT 480
+// This function is new since the video was published
+void HandleClayErrors(const Clay_ErrorData error_data)
+{
+    printf("%s", error_data.errorText.chars);
+}
 
-int main(void) {
-    if (!SDL_Init(SDL_INIT_VIDEO)) {
-        fprintf(stderr, "ERROR: SDL_Init failed: %s\n", SDL_GetError());
-        return 1;
-    }
+int main(void)
+{
+    const float width = 640.0f;
+    const float height = 480.0f;
 
-    SDL_Window* window;
-    window = SDL_CreateWindow(WINDOW_TITLE, WINDOW_WIDTH, WINDOW_HEIGHT, SDL_WINDOW_VULKAN);
+    Clay_Raylib_Initialize((int)width, (int)height, "Introducing Clay Demo", FLAG_WINDOW_RESIZABLE | FLAG_WINDOW_HIGHDPI | FLAG_MSAA_4X_HINT | FLAG_VSYNC_HINT);
 
-    if (window == NULL) {
-        fprintf(stderr, "ERROR: SDL_CreateWindow failed: %s\n", SDL_GetError());
-        return 1;
-    }
+    const uint64_t clay_required_memory = Clay_MinMemorySize();
+    const Clay_Arena clay_memory = Clay_CreateArenaWithCapacityAndMemory(clay_required_memory, malloc(clay_required_memory));
 
-    SDL_SetWindowPosition(window, SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED);
+    Clay_Initialize(clay_memory, (Clay_Dimensions){
+                        .width = (float)GetScreenWidth(),
+                        .height = (float)GetScreenHeight()
+                    }, (Clay_ErrorHandler){HandleClayErrors});
 
-    bool quit = false;
-    while (!quit) {
-        SDL_Event event;
-        if (SDL_PollEvent(&event))
-        {
-            if (event.type == SDL_EVENT_WINDOW_CLOSE_REQUESTED)
-            {
-                quit = true;
-            }
-        }
-    }
-
-    SDL_DestroyWindow(window);
-    SDL_Quit();
-
-    ANVAllocator alloc = anv_alloc_default();
-    ANVArrayList *list = anv_arraylist_create(&alloc, 0);
-
-    int nums[] = {1, 2, 3, 4, 5};
-    for (int i = 0; i < 5; i++) {
-        anv_arraylist_push_back(list, &nums[i]);
-    }
-
-    for (int i = 0; i < anv_arraylist_size(list); i++)
+    while (!WindowShouldClose())
     {
-        printf("Num: %d\n", *(int*)anv_arraylist_get(list, i));
+        // Run once per frame
+        Clay_SetLayoutDimensions((Clay_Dimensions){
+            .width = (float)GetScreenWidth(),
+            .height = (float)GetScreenHeight()
+        });
+
+        const Vector2 mousePosition = GetMousePosition();
+        const Vector2 scrollDelta = GetMouseWheelMoveV();
+        Clay_SetPointerState(
+            (Clay_Vector2){mousePosition.x, mousePosition.y},
+            IsMouseButtonDown(0)
+        );
+
+        Clay_UpdateScrollContainers(
+            true,
+            (Clay_Vector2){scrollDelta.x, scrollDelta.y},
+            GetFrameTime()
+        );
+
+        Clay_BeginLayout();
+
+
+        const Clay_RenderCommandArray renderCommands = Clay_EndLayout();
+
+        BeginDrawing();
+
+        ClearBackground(BLACK);
+        Clay_Raylib_Render(renderCommands, NULL);
+
+        EndDrawing();
     }
 
-    anv_arraylist_destroy(list, false);
-
-    printf("Hello, World!\n");
-
-    return 0;
+    Clay_Raylib_Close();
 }

@@ -9,21 +9,17 @@ FetchContent_Declare(
 
 set(ANV_BUILD_EXAMPLES OFF)
 set(ANV_BUILD_TESTS OFF)
+set(ANV_BUILD_SHARED_LIBS ON)
+set(ANV_ENABLE_SANITIZERS OFF)
 
 FetchContent_Declare(
-        clay
-        GIT_REPOSITORY https://github.com/nicbarker/clay
-        GIT_TAG main
+        raylib
+        GIT_REPOSITORY https://github.com/raysan5/raylib
+        GIT_TAG 5.5
         GIT_SHALLOW TRUE
 )
-set(CLAY_INCLUDE_ALL_EXAMPLES OFF)
-set(CLAY_INCLUDE_SDL3_EXAMPLES ON)
+set(BUILD_EXAMPLES OFF)
+set(CUSTOMIZE_BUILD OFF)
+set(BUILD_SHARED_LIBS ON)
 
-FetchContent_Declare(
-        SDL3
-        GIT_REPOSITORY https://github.com/libsdl-org/SDL
-        GIT_TAG release-3.2.24
-)
-
-
-FetchContent_MakeAvailable(Anvil clay SDL3)
+FetchContent_MakeAvailable(Anvil raylib)
