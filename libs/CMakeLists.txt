@@ -19,5 +19,11 @@ FetchContent_Declare(
 set(CLAY_INCLUDE_ALL_EXAMPLES OFF)
 set(CLAY_INCLUDE_SDL3_EXAMPLES ON)
 
+FetchContent_Declare(
+        SDL3
+        GIT_REPOSITORY https://github.com/libsdl-org/SDL
+        GIT_TAG release-3.2.24
+)
 
-FetchContent_MakeAvailable(Anvil clay)
+
+FetchContent_MakeAvailable(Anvil clay SDL3)

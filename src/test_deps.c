@@ -1,39 +1,62 @@
-// Must be defined in one file, _before_ #include "clay.h"
-#define CLAY_IMPLEMENTATION
+#include <stdio.h>
+#include <stdlib.h>
+#include <SDL3/SDL.h>
 
-#include <unistd.h>
-#include "clay.h"
-#include "renderers/terminal/clay_renderer_terminal_ansi.c"
-#include "examples/shared-layouts/clay_video_demo.c"
+#include "anvil/common.h"
+#include "anvil/containers/arraylist.h"
 
-const Clay_Color COLOR_LIGHT = (Clay_Color) {224, 215, 210, 255};
-const Clay_Color COLOR_RED = (Clay_Color) {168, 66, 28, 255};
-const Clay_Color COLOR_ORANGE = (Clay_Color) {225, 138, 50, 255};
+#define WINDOW_TITLE "Test"
+#define WINDOW_WIDTH 640
+#define WINDOW_HEIGHT 480
 
-void HandleClayErrors(Clay_ErrorData errorData) {
-    printf("%s", errorData.errorText.chars);
-}
 
-int main() {
-    const int width = 145;
-    const int height = 41;
-    int columnWidth = 16;
-
-    uint64_t totalMemorySize = Clay_MinMemorySize();
-    Clay_Arena arena = Clay_CreateArenaWithCapacityAndMemory(totalMemorySize, malloc(totalMemorySize));
-    Clay_Initialize(arena,
-                    (Clay_Dimensions) {.width = (float) width * columnWidth, .height = (float) height * columnWidth},
-                    (Clay_ErrorHandler) {HandleClayErrors});
-    // Tell clay how to measure text
-    Clay_SetMeasureTextFunction(Console_MeasureText, &columnWidth);
-    ClayVideoDemo_Data demoData = ClayVideoDemo_Initialize();
-
-    while (true) {
-        Clay_RenderCommandArray renderCommands = ClayVideoDemo_CreateLayout(&demoData);
-
-        Clay_Terminal_Render(renderCommands, width, height, columnWidth);
-
-        fflush(stdout);
-        sleep(1);
+int main(void) {
+    if (!SDL_Init(SDL_INIT_VIDEO)) {
+        fprintf(stderr, "ERROR: SDL_Init failed: %s\n", SDL_GetError());
+        return 1;
     }
+
+    SDL_Window* window;
+    window = SDL_CreateWindow(WINDOW_TITLE, WINDOW_WIDTH, WINDOW_HEIGHT, SDL_WINDOW_VULKAN);
+
+    if (window == NULL) {
+        fprintf(stderr, "ERROR: SDL_CreateWindow failed: %s\n", SDL_GetError());
+        return 1;
+    }
+
+    SDL_SetWindowPosition(window, SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED);
+
+    bool quit = false;
+    while (!quit) {
+        SDL_Event event;
+        if (SDL_PollEvent(&event))
+        {
+            if (event.type == SDL_EVENT_WINDOW_CLOSE_REQUESTED)
+            {
+                quit = true;
+            }
+        }
+    }
+
+    SDL_DestroyWindow(window);
+    SDL_Quit();
+
+    ANVAllocator alloc = anv_alloc_default();
+    ANVArrayList *list = anv_arraylist_create(&alloc, 0);
+
+    int nums[] = {1, 2, 3, 4, 5};
+    for (int i = 0; i < 5; i++) {
+        anv_arraylist_push_back(list, &nums[i]);
+    }
+
+    for (int i = 0; i < anv_arraylist_size(list); i++)
+    {
+        printf("Num: %d\n", *(int*)anv_arraylist_get(list, i));
+    }
+
+    anv_arraylist_destroy(list, false);
+
+    printf("Hello, World!\n");
+
+    return 0;
 }

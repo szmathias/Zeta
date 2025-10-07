@@ -7,8 +7,23 @@ set(CMAKE_C_EXTENSIONS OFF)
 
 add_subdirectory(libs)
 
-add_executable(Zeta src/test_deps.c)
+add_executable(${PROJECT_NAME} src/test_deps.c)
 
-target_include_directories(Zeta PRIVATE ${clay_SOURCE_DIR})
+if(WIN32)
 
-target_link_libraries(Zeta PRIVATE Anvil clay)
+    add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
+            COMMAND ${CMAKE_COMMAND} -E copy_if_different
+            $<TARGET_FILE:Anvil>
+            ${CMAKE_BINARY_DIR}
+            COMMENT "Copying Anvil.dll to tests directory for Windows")
+
+    add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
+            COMMAND ${CMAKE_COMMAND} -E copy_if_different
+            $<TARGET_FILE:SDL3-shared>
+            ${CMAKE_BINARY_DIR}
+            COMMENT "Copying SDL3.dll to tests directory for Windows")
+endif ()
+
+
+target_include_directories(${PROJECT_NAME} PUBLIC ${clay_SOURCE_DIR} ${Anvil_SOURCE_DIR}/include)
+target_link_libraries(${PROJECT_NAME} PUBLIC Anvil SDL3::SDL3-shared)
