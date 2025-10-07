@@ -10,6 +10,34 @@ set(CMAKE_C_EXTENSIONS OFF)
 
 add_subdirectory(libs)
 
+SET(ZETA_LIBS_LINK
+        Anvil
+        raylib
+)
+
+set(ZETA_LIBS_INCLUDE
+        ${CMAKE_SOURCE_DIR}/libs/clay
+        ${CMAKE_SOURCE_DIR}/include
+        ${Anvil_SOURCE_DIR}/include
+        ${raylib_Build_DIR}/src
+)
+
+set(ZETA_LIBS_SOURCES
+
+)
+
+set(ZETA_SOURCES
+        src/test_deps.c
+        src/clay_raylib_renderer.c
+        include/clay_raylib_renderer.h
+)
+
+list(APPEND ZETA_SOURCES ${ZETA_LIBS_SOURCES})
+
+add_executable(${PROJECT_NAME} ${ZETA_SOURCES})
+
+target_include_directories(${PROJECT_NAME} PUBLIC ${ZETA_LIBS_INCLUDE})
+target_link_libraries(${PROJECT_NAME} PUBLIC ${ZETA_LIBS_LINK})
 
 if (WIN32)
     add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
@@ -26,30 +54,3 @@ if (WIN32)
             COMMENT "Copying raylib to source directory for Windows"
     )
 endif ()
-
-
-SET(ZETA_LIBS_LINK Anvil raylib)
-
-set(ZETA_LIBS_INCLUDE
-        ${CMAKE_SOURCE_DIR}/libs/clay
-        ${CMAKE_SOURCE_DIR}/include
-        ${Anvil_SOURCE_DIR}/include
-        ${raylib_Build_DIR}/src
-)
-
-set(ZETA_LIBS_SOURCES
-        src/clay_raylib_renderer.c
-)
-
-set(ZETA_SOURCES
-        src/test_deps.c
-        include/clay_raylib_renderer.h
-)
-
-
-list(APPEND ZETA_SOURCES ${ZETA_LIBS_SOURCES})
-
-add_executable(${PROJECT_NAME} ${ZETA_SOURCES})
-
-target_include_directories(${PROJECT_NAME} PUBLIC ${ZETA_LIBS_INCLUDE})
-target_link_libraries(${PROJECT_NAME} PUBLIC ${ZETA_LIBS_LINK})
