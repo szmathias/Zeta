@@ -1,3 +1,3 @@
 # Zeta
 
-Z80 Emulation Toolchain
+An Intel 8080 Emulation Toolchain
