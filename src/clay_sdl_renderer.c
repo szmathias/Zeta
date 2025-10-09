@@ -16,11 +16,11 @@ void SDL_Clay_RenderFillRoundedRect(Clay_SDL3RendererData* rendererData, const S
 
     const int numCircleSegments = SDL_max(NUM_CIRCLE_SEGMENTS, (int) clampedRadius * 0.5f);
 
-    int totalVertices = 4 + (4 * (numCircleSegments * 2)) + 2 * 4;
-    int totalIndices = 6 + (4 * (numCircleSegments * 3)) + 6 * 4;
+    int totalVertices = 4 + 4 * (numCircleSegments * 2) + 2 * 4;
+    int totalIndices = 6 + 4 * (numCircleSegments * 3) + 6 * 4;
 
-    SDL_Vertex vertices[totalVertices];
-    int indices[totalIndices];
+    SDL_Vertex *vertices = malloc(sizeof(SDL_Vertex) * totalVertices);
+    int *indices = malloc(sizeof(int) * totalIndices);
 
     //define center rectangle
     vertices[vertexCount++] = (SDL_Vertex){{rect.x + clampedRadius, rect.y + clampedRadius}, color, {0, 0}};                   //0 center TL
@@ -130,6 +130,9 @@ void SDL_Clay_RenderFillRoundedRect(Clay_SDL3RendererData* rendererData, const S
 
     // Render everything
     SDL_RenderGeometry(rendererData->renderer, NULL, vertices, vertexCount, indices, indexCount);
+
+    free(indices);
+    free(vertices);
 }
 
 void SDL_Clay_RenderArc(const Clay_SDL3RendererData* rendererData, const SDL_FPoint center, const float radius, const float startAngle, const float endAngle, const float thickness, const Clay_Color color)
@@ -144,9 +147,10 @@ void SDL_Clay_RenderArc(const Clay_SDL3RendererData* rendererData, const SDL_FPo
     const float angleStep = (radEnd - radStart) / (float)numCircleSegments;
     const float thicknessStep = 0.4f; //arbitrary value to avoid overlapping lines. Changing THICKNESS_STEP or numCircleSegments might cause artifacts.
 
+    const size_t circleSegmentSize = sizeof(SDL_FPoint) * numCircleSegments + 1;
+    SDL_FPoint *points = malloc(circleSegmentSize);
     for (float t = thicknessStep; t < thickness - thicknessStep; t += thicknessStep)
     {
-        SDL_FPoint points[numCircleSegments + 1];
         const float clampedRadius = SDL_max(radius - t, 1.0f);
 
         for (int i = 0; i <= numCircleSegments; i++)
@@ -159,6 +163,7 @@ void SDL_Clay_RenderArc(const Clay_SDL3RendererData* rendererData, const SDL_FPo
         }
         SDL_RenderLines(rendererData->renderer, points, numCircleSegments + 1);
     }
+    free(points);
 }
 
 static SDL_Rect currentClippingRectangle;
